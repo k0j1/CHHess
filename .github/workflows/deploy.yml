@@ -1,0 +1,103 @@
+
+name: Deploy to GitHub Pages and FTP
+
+on:
+  push:
+    branches: ["main", "master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      # Setup Node.js for Frontend
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      
+      # Setup PHP for Backend
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, gmp, bcmath
+          tools: composer:v2
+
+      # Install Node dependencies
+      - name: Install Node dependencies
+        run: npm install
+
+      # Install PHP dependencies
+      - name: Install PHP dependencies
+        run: |
+          if [ -f "api/composer.json" ]; then
+            cd api
+            composer install --no-dev --optimize-autoloader
+            cd ..
+          fi
+
+      # Build Project
+      - name: Build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          # Build Frontend
+          npm run build
+          
+          # Prepare API directory in dist
+          mkdir -p dist/api
+          
+          # Copy PHP files
+          if [ -d "api" ]; then 
+            cp api/*.php dist/api/
+            
+            # Copy vendor directory if it exists
+            if [ -d "api/vendor" ]; then
+              cp -r api/vendor dist/api/
+            fi
+          fi
+      
+      # FTP Deploy to CoreServer
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: ./
+          # Ensure vendor directory is synced efficiently
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
