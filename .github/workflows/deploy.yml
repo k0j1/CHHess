@@ -1,5 +1,5 @@
 
-name: Deploy to GitHub Pages and FTP
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -28,26 +28,9 @@ jobs:
         with:
           node-version: "20"
       
-      # Setup PHP for Backend
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, gmp, bcmath
-          tools: composer:v2
-
       # Install Node dependencies
       - name: Install Node dependencies
         run: npm install
-
-      # Install PHP dependencies
-      - name: Install PHP dependencies
-        run: |
-          if [ -f "api/composer.json" ]; then
-            cd api
-            composer install --no-dev --optimize-autoloader
-            cd ..
-          fi
 
       # Build Project
       - name: Build
@@ -57,35 +40,7 @@ jobs:
         run: |
           # Build Frontend
           npm run build
-          
-          # Prepare API directory in dist
-          mkdir -p dist/api
-          
-          # Copy PHP files
-          if [ -d "api" ]; then 
-            cp api/*.php dist/api/
-            
-            # Copy vendor directory if it exists
-            if [ -d "api/vendor" ]; then
-              cp -r api/vendor dist/api/
-            fi
-          fi
       
-      # FTP Deploy to CoreServer
-      - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/
-          server-dir: ./
-          # Ensure vendor directory is synced efficiently
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
