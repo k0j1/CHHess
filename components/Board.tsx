@@ -1,5 +1,5 @@
 
-import { Board as BoardType, Position, Move, PieceType, PieceColor, BLACK, WHITE } from '../types';
+import { Board as BoardType, Position, Move, PieceType, PieceColor, WHITE } from '../types';
 
 type BoardProps = {
   board: BoardType;
@@ -32,13 +32,6 @@ export const Board = ({ board, validMoves, lastMove, onSquareClick, selectedPos,
   const isLastMove = (r: number, c: number) => {
       if (!lastMove) return false;
       return (lastMove.from.r === r && lastMove.from.c === c) || (lastMove.to.r === r && lastMove.to.c === c);
-  };
-
-  const isInCheck = (r: number, c: number) => {
-      const p = board[r][c];
-      // Note: Full check visualization requires state from Game.tsx, purely visual here is hard. 
-      // We'll skip red highlight for check for now to keep it simple, or implement if 'kingInCheck' prop was passed.
-      return false; 
   };
 
   return (

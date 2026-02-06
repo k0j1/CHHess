@@ -1,5 +1,5 @@
 
-import { Level, FarcasterUser, WHITE } from './types';
+import { Level, FarcasterUser } from './types';
 import { useGameLogic } from './hooks/useGameLogic';
 import { Board } from './components/Board';
 import { ScoreBoard } from './components/ScoreBoard';
@@ -22,7 +22,6 @@ export const Game = ({ level, onExit, user, connectedAddress, onError }: GamePro
     gameOver,
     scores,
     validMoves,
-    aiThinking,
     lastMove,
     toast,
     handleSquareClick,

@@ -30,8 +30,6 @@ export const useGameLogic = (
   }, []);
 
   // Stats Hook Integration - We mock scores as material for compatibility or just 1-0
-  const scores = { black: 0, white: 0 }; // Placeholder to keep stats hook happy if needed, though we will likely need to adjust stats logic
-  // Actually, useGameStats needs to be compatible.
   // In Chess: Win = we pass score {black: 0, white: 1} etc so the winner logic works?
   // Let's adapt scores for useGameStats: White=Player(2), Black=AI(1).
   const mockScores = { 

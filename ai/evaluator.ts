@@ -1,5 +1,5 @@
 
-import { Board, PieceColor, PieceType, WHITE, BLACK } from '../types';
+import { Board, PieceColor, PieceType, WHITE } from '../types';
 import { BOARD_SIZE } from '../gameLogic';
 
 // Material Value
@@ -57,7 +57,6 @@ const getPositionBonus = (type: PieceType, r: number, c: number, color: PieceCol
 
 export const evaluateBoard = (board: Board, playerColor: PieceColor): number => {
     let score = 0;
-    const opponentColor = playerColor === WHITE ? BLACK : WHITE;
 
     for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
